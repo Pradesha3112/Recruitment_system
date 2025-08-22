@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .welcome {
+            color: #2c3e50;
+        }
+        .logout-btn {
+            background-color: #e74c3c;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+        .dashboard-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="welcome">Welcome, {{ user.company_name }}!</h1>
+        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+    </div>
+    
+    <div class="dashboard-content">
+        <h2>Company Dashboard</h2>
+        <p>This is your company dashboard. Here you can:</p>
+        <ul>
+            <li>Post new job openings</li>
+            <li>Review applications</li>
+            <li>View candidate test results</li>
+            <li>Manage the hiring process</li>
+            <li>Communicate with candidates</li>
+            <li>Track hiring statistics</li>
+        </ul>
+        <p>These features will be implemented in the next steps.</p>
+    </div>
+</body>
+</html>
