@@ -50,6 +50,18 @@
             text-align: center;
             margin-top: 20px;
         }
+        .password-container {
+            position: relative;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -88,7 +100,10 @@
         
         <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
+            <div class="password-container">
+                <input type="password" id="password" name="password" required style="padding-right: 40px;">
+                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('password')">👁️</button>
+            </div>
         </div>
         
         <button type="submit">Login</button>
@@ -105,5 +120,20 @@
     <div style="text-align: center; margin-top: 15px;">
         <a href="{{ url_for('home') }}">← Back to Home</a>
     </div>
+
+    <script>
+        function togglePasswordVisibility(inputId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleButton = passwordInput.nextElementSibling;
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleButton.textContent = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                toggleButton.textContent = '👁️';
+            }
+        }
+    </script>
 </body>
 </html>

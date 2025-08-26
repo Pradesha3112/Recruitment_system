@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post a Job - {{ user.company_name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .welcome {
+            color: #2c3e50;
+        }
+        .logout-btn {
+            background-color: #e74c3c;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        button {
+            background-color: #27ae60;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #219a52;
+        }
+        .nav-links {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .nav-links a {
+            color: #3498db;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="welcome">Post a New Job - {{ user.company_name }}</h1>
+        <div>
+            <a href="{{ url_for('company_dashboard') }}" style="margin-right: 15px; color: #3498db;">← Dashboard</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div style="margin-bottom: 20px;">
+                {% for category, message in messages %}
+                    <div style="color: {% if category == 'error' %}red{% else %}green{% endif %}; 
+                                padding: 15px; 
+                                background-color: {% if category == 'error' %}#ffebee{% else %}#e8f5e8{% endif %};
+                                border: 1px solid {% if category == 'error' %}#f44336{% else %}#4caf50{% endif %};
+                                border-radius: 4px;
+                                margin-bottom: 10px;">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="form-container">
+        <form method="POST" action="">
+            <div class="form-group">
+                <label for="title">Job Title *</label>
+                <input type="text" id="title" name="title" required placeholder="e.g., Python Developer">
+            </div>
+
+            <div class="form-group">
+                <label for="role_type">Role Type *</label>
+                <select id="role_type" name="role_type" required>
+                    <option value="">Select Role Type</option>
+                    <option value="Developer">Developer</option>
+                    <option value="UI/UX Designer">UI/UX Designer</option>
+                    <option value="Digital Marketing">Digital Marketing</option>
+                    <option value="Data Analyst">Data Analyst</option>
+                    <option value="DevOps">DevOps</option>
+                    <option value="QA Tester">QA Tester</option>
+                    <option value="Project Manager">Project Manager</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Job Description *</label>
+                <textarea id="description" name="description" required placeholder="Describe the job responsibilities, what you're looking for in a candidate, etc."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="requirements">Requirements & Qualifications</label>
+                <textarea id="requirements" name="requirements" placeholder="List the required skills, experience, education, etc. (one per line)"></textarea>
+            </div>
+
+            <button type="submit">Post Job</button>
+        </form>
+    </div>
+
+    <div class="nav-links">
+        <a href="{{ url_for('company_dashboard') }}">Back to Dashboard</a>
+        <a href="{{ url_for('home') }}">Home</a>
+    </div>
+</body>
+</html>

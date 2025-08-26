@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Job Postings - {{ user.company_name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .welcome {
+            color: #2c3e50;
+        }
+        .logout-btn {
+            background-color: #e74c3c;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .job-list {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .job-item {
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            background: white;
+        }
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .job-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .job-meta {
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+        .applications-section {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        .application-item {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            background: white;
+        }
+        .candidate-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .candidate-name {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .candidate-email {
+            color: #3498db;
+        }
+        .application-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-applied { background: #e3f2fd; color: #1976d2; }
+        .status-test { background: #fff3e0; color: #f57c00; }
+        .status-hired { background: #e8f5e8; color: #2e7d32; }
+        .status-rejected { background: #ffebee; color: #c62828; }
+        .btn {
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 4px;
+            display: inline-block;
+            margin-right: 10px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .empty-state {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 40px;
+        }
+        .toggle-applications {
+            background: none;
+            border: none;
+            color: #3498db;
+            cursor: pointer;
+            text-decoration: underline;
+            margin-top: 10px;
+        }
+        .applications-list {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .applications-list.show {
+            max-height: 500px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="welcome">Our Job Postings - {{ user.company_name }}</h1>
+        <div>
+            <a href="{{ url_for('company_dashboard') }}" style="margin-right: 15px; color: #3498db;">← Dashboard</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div style="margin-bottom: 20px;">
+                {% for category, message in messages %}
+                    <div style="color: {% if category == 'error' %}red{% else %}green{% endif %}; 
+                                padding: 15px; 
+                                background-color: {% if category == 'error' %}#ffebee{% else %}#e8f5e8{% endif %};
+                                border: 1px solid {% if category == 'error' %}#f44336{% else %}#4caf50{% endif %};
+                                border-radius: 4px;
+                                margin-bottom: 10px;">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="job-list">
+        {% if jobs %}
+            {% for job in jobs %}
+                <div class="job-item">
+                    <div class="job-header">
+                        <div class="job-title">{{ job.title }}</div>
+                        <div>
+                            <span class="application-status status-applied">
+                                {{ job.applications|length }} Applications
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="job-meta">
+                        <strong>Type:</strong> {{ job.role_type }} | 
+                        <strong>Posted:</strong> {{ job.date_posted.strftime('%Y-%m-%d') }} | 
+                        <strong>Status:</strong> Active
+                    </div>
+
+                    <div class="applications-section">
+                        <h3>Applications ({{ job.applications|length }})</h3>
+                        
+                        {% if job.applications %}
+                            <div class="applications-list show" id="applications-{{ job.id }}">
+                                {% for application in job.applications %}
+                                    <div class="application-item">
+                                        <div class="candidate-info">
+                                            <div>
+                                                <span class="candidate-name">{{ application.candidate_name }}</span>
+                                                <span class="candidate-email">({{ application.candidate_email }})</span>
+                                            </div>
+                                            <span class="application-status status-{{ application.status|lower|replace(' ', '-') }}">
+                                                {{ application.status }}
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="job-meta">
+                                            Applied: {{ application.date_applied.strftime('%Y-%m-%d %H:%M') }}
+                                            {% if application.aptitude_score %} | Aptitude: {{ application.aptitude_score }}/100{% endif %}
+                                            {% if application.coding_score %} | Coding: {{ application.coding_score }}/100{% endif %}
+                                            {% if application.project_score %} | Project: {{ application.project_score }}/100{% endif %}
+                                        </div>
+
+                                        <div style="margin-top: 10px;">
+                                            <button class="btn btn-primary">View Profile</button>
+                                            <button class="btn btn-success">Schedule Interview</button>
+                                            <button class="btn btn-danger">Reject</button>
+                                            <button class="btn btn-success">Hire</button>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p>No applications yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <h3>No jobs posted yet</h3>
+                <p>You haven't posted any job openings yet.</p>
+                <a href="{{ url_for('post_job') }}" class="btn btn-primary">Post Your First Job</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="{{ url_for('company_dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+        <a href="{{ url_for('home') }}" class="btn btn-secondary">Home</a>
+    </div>
+
+    <script>
+        function toggleApplications(jobId) {
+            const applicationsList = document.getElementById('applications-' + jobId);
+            applicationsList.classList.toggle('show');
+        }
+    </script>
+</body>
+</html>

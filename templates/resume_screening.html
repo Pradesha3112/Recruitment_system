@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Screening - {{ job.title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px 5px;
+        }
+        .btn-primary {
+            background-color: #27ae60;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Resume Screening - {{ job.title }}</h1>
+        <a href="{{ url_for('application_process', job_id=job.id) }}">← Back to Process</a>
+    </div>
+
+    <div class="container">
+        <h2>Resume Screening Process</h2>
+        <p>This automated system will analyze your resume against the job requirements.</p>
+        
+        <form method="POST">
+            <h3>Upload Your Resume</h3>
+            <p>Supported formats: PDF, DOC, DOCX (Max 5MB)</p>
+            <input type="file" accept=".pdf,.doc,.docx" style="margin: 15px 0;">
+            
+            <h3>Or Paste Resume Text</h3>
+            <textarea placeholder="Paste your resume content here..." style="width: 100%; height: 200px; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+            
+            <div style="margin-top: 20px;">
+                <button type="submit" class="btn btn-primary">Start Screening</button>
+                <a href="{{ url_for('application_process', job_id=job.id) }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
