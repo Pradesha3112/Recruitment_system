@@ -5,7 +5,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-
+import time
+import random
 # Create and configure the Flask application
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'  # Needed for session management and security
@@ -61,7 +62,23 @@ class Company(UserMixin, db.Model):
 
     def __repr__(self):
         return f"Company('{self.company_name}', '{self.email}')"
-
+# Add to your models section (after the Application model)
+class Assessment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    application_id = db.Column(db.Integer, db.ForeignKey('application.id'), nullable=False)
+    resume_score = db.Column(db.Float)
+    aptitude_score = db.Column(db.Float)
+    coding_score = db.Column(db.Float)
+    video_score = db.Column(db.Float)
+    current_round = db.Column(db.String(50), default='resume_screening')  # resume_screening, aptitude, coding, video, completed
+    started_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    completed_at = db.Column(db.DateTime)
+    
+    # Relationships
+    application = db.relationship('Application', backref=db.backref('assessment', uselist=False))
+    
+    def __repr__(self):
+        return f"Assessment('{self.application_id}', '{self.current_round}')"
 class Job(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
@@ -370,30 +387,55 @@ def view_job(job_id):
     # Get the job
     job = Job.query.get_or_404(job_id)
     
-    # Check if user has already applied
-    has_applied = Application.query.filter_by(
+    # Check if user has already applied and get the application
+    application = Application.query.filter_by(
         candidate_id=current_user.id,
         job_id=job_id
-    ).first() is not None
+    ).first()
+    
+    has_applied = application is not None
     
     # Get application status if applied
     application_status = None
     if has_applied:
-        application = Application.query.filter_by(
-            candidate_id=current_user.id,
-            job_id=job_id
-        ).first()
         application_status = application.status
     
     return render_template('job_details.html', 
                          user=current_user, 
                          job=job, 
                          has_applied=has_applied,
+                         application=application,  # Add this line
                          application_status=application_status)
-
+# Replace the current apply_job route with this:
 @app.route('/apply/<int:job_id>')
 @login_required
 def apply_job(job_id):
+    # Check if the current user is actually a candidate
+    if not isinstance(current_user, Candidate):
+        flash('Access denied. Please login as a candidate.', 'error')
+        return redirect(url_for('login'))
+    
+    # Get the job details
+    job = Job.query.get_or_404(job_id)
+    
+    # Check if already applied
+    existing_application = Application.query.filter_by(
+        candidate_id=current_user.id,
+        job_id=job_id
+    ).first()
+    
+    if existing_application:
+        flash('You have already applied for this position.', 'info')
+        return redirect(url_for('view_job', job_id=job_id))
+    
+    return render_template('apply_confirmation.html', 
+                         user=current_user, 
+                         job=job)
+
+# Add a new route to handle the actual application submission
+@app.route('/submit-application/<int:job_id>', methods=['POST'])
+@login_required
+def submit_application(job_id):
     # Check if the current user is actually a candidate
     if not isinstance(current_user, Candidate):
         flash('Access denied. Please login as a candidate.', 'error')
@@ -409,6 +451,27 @@ def apply_job(job_id):
         flash('You have already applied for this position.', 'info')
         return redirect(url_for('view_job', job_id=job_id))
     
+    # Handle file upload if present
+    resume_filename = None
+    if 'resume' in request.files:
+        resume_file = request.files['resume']
+        if resume_file and resume_file.filename != '':
+            # Secure the filename and save it
+            from werkzeug.utils import secure_filename
+            import os
+            import uuid
+            
+            # Create upload folder if it doesn't exist
+            upload_folder = os.path.join(app.root_path, 'static', 'resumes')
+            os.makedirs(upload_folder, exist_ok=True)
+            
+            # Generate a unique filename
+            filename = secure_filename(resume_file.filename)
+            unique_filename = f"{uuid.uuid4().hex}_{filename}"
+            resume_path = os.path.join(upload_folder, unique_filename)
+            resume_file.save(resume_path)
+            resume_filename = unique_filename
+    
     # Create new application
     new_application = Application(
         candidate_id=current_user.id,
@@ -416,18 +479,25 @@ def apply_job(job_id):
         status='Applied'
     )
     
+    # You might want to add a resume_filename field to your Application model
+    # if you want to store the resume filename
+    
     try:
         db.session.add(new_application)
         db.session.commit()
+        
+        # Create assessment for this application
+        new_assessment = Assessment(application_id=new_application.id)
+        db.session.add(new_assessment)
+        db.session.commit()
+        
         flash('Application submitted successfully!', 'success')
+        return redirect(url_for('assessment', application_id=new_application.id))
     except Exception as e:
         db.session.rollback()
         flash('An error occurred while submitting your application.', 'error')
         print(f"Error: {e}")
-    
-    return redirect(url_for('view_job', job_id=job_id))
-
-# Placeholder routes for future implementation
+        return redirect(url_for('view_job', job_id=job_id))# Placeholder routes for future implementation
 @app.route('/applications')
 @login_required
 def view_applications():
@@ -513,6 +583,35 @@ def company_stats_api():
     stats['recent_applications'] = all_applications[:10]
     
     return jsonify(stats)
+
+@app.route('/assessment')
+@login_required
+def assessment():
+    # Check if the current user is actually a candidate
+    if not isinstance(current_user, Candidate):
+        flash('Access denied. Please login as a candidate.', 'error')
+        return redirect(url_for('login'))
+    
+    return render_template('assessment.html', user=current_user)
+
+           # Check if the current user is the applicant
+    application = Application.query.get_or_404(application_id)
+    
+    if application.candidate_id != current_user.id:
+        flash('Access denied.', 'error')
+        return redirect(url_for('candidate_dashboard'))
+    
+    # Get or create assessment
+    assessment = Assessment.query.filter_by(application_id=application_id).first()
+    if not assessment:
+        assessment = Assessment(application_id=application_id)
+        db.session.add(assessment)
+        db.session.commit()
+    
+    return render_template('assessment.html', 
+                         application=application, 
+                         assessment=assessment,
+                         user=current_user)
 # Run the application
 if __name__ == '__main__':
     app.run(debug=True)

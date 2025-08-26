@@ -194,21 +194,6 @@
             </div>
         </div>
 
-        {% if has_applied %}
-            <div class="application-status {% if application_status == 'Hired' %}status-approved{% elif application_status == 'Rejected' %}status-rejected{% else %}status-pending{% endif %}">
-                <h3>✅ Application Submitted</h3>
-                <p>You have applied for this position on {{ application.date_applied.strftime('%B %d, %Y at %H:%M') }}</p>
-                <p><strong>Current Status:</strong> {{ application_status }}</p>
-                {% if application_status == 'Applied' %}
-                    <p>Your application is under review. The company will contact you soon.</p>
-                {% elif application_status == 'Hired' %}
-                    <p>Congratulations! You have been selected for this position.</p>
-                {% elif application_status == 'Rejected' %}
-                    <p>Thank you for your application. Unfortunately, you were not selected for this position.</p>
-                {% endif %}
-            </div>
-        {% endif %}
-
         <div class="job-section">
             <h3 class="section-title">Job Description</h3>
             <div class="job-description">
@@ -244,9 +229,11 @@
             {% if has_applied %}
                 <a href="{{ url_for('browse_jobs') }}" class="btn btn-secondary">Browse Other Jobs</a>
                 <a href="{{ url_for('candidate_dashboard') }}" class="btn btn-primary">View My Applications</a>
+            <a href="{{ url_for('assessment') }}" class="btn btn-primary">Apply Now</a>
             {% else %}
-                <a href="{{ url_for('apply_job', job_id=job.id) }}" class="btn btn-primary">Apply Now</a>
-                <a href="{{ url_for('browse_jobs') }}" class="btn btn-secondary">Back to Jobs</a>
+ 
+    <a href="{{ url_for('apply_job', job_id=job.id) }}" class="btn btn-primary">Apply Now</a>
+      <a href="{{ url_for('browse_jobs') }}" class="btn btn-secondary">Back to Jobs</a>
             {% endif %}
         </div>
     </div>
