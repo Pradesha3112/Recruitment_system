@@ -594,7 +594,7 @@ def assessment():
     
     return render_template('assessment.html', user=current_user)
 
-           # Check if the current user is the applicant
+            # Check if the current user is the applicant
     application = Application.query.get_or_404(application_id)
     
     if application.candidate_id != current_user.id:
@@ -611,7 +611,30 @@ def assessment():
     return render_template('assessment.html', 
                          application=application, 
                          assessment=assessment,
+
                          user=current_user)
+@app.route('/application/<int:application_id>/resume_screening')
+def resume_screening(application_id):
+    # Fetch application details
+    application = Application.query.get_or_404(application_id)
+    return render_template('resume_screening.html', application=application)
+
+@app.route('/application/<int:application_id>/aptitude_test')
+def aptitude_test(application_id):
+    application = Application.query.get_or_404(application_id)
+    return render_template('aptitude_test.html', application=application)
+
+@app.route('/application/<int:application_id>/coding_test')
+def coding_test(application_id):
+    application = Application.query.get_or_404(application_id)
+    return render_template('coding_test.html', application=application)
+
+@app.route('/application/<int:application_id>/project_round')
+def project_round(application_id):
+    application = Application.query.get_or_404(application_id)
+    return render_template('project_round.html', application=application)
+
+
 # Run the application
 if __name__ == '__main__':
     app.run(debug=True)
