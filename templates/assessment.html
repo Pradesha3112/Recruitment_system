@@ -110,64 +110,66 @@
                             <div class="flex-grow-1">
                                 <h5 class="card-title">Round 1: ATS Resume Screening</h5>
                                 <p class="card-text">Your resume will be automatically screened by our ATS system.</p>
-                                <div class="d-flex align-items-center">
-                                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                    <span class="text-primary">Screening in progress...</span>
-                                </div>
+                          </div>
+                          <a href="{{ url_for('resume') }}" class="btn btn-primary">Start
+                                 <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+<div class="card round-card current" id="round2">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="round-icon text-primary">
+                                <i class="fas fa-file-alt"></i>
                             </div>
-                            <button class="btn btn-primary" onclick="showPage('resumeScreening')">
-                                View Details <i class="fas fa-arrow-right ms-1"></i>
-                            </button>
+                            <div class="flex-grow-1">
+                                <h5 class="card-title">Round 2: Apptitude</h5>
+                                <p class="card-text">Your resume will be automatically screened by our ATS system.</p>
+                          </div>
+                          <a href="{{ url_for('apptitude') }}" class="btn btn-primary">Start
+                                 <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+<div class="card round-card current" id="round3">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="round-icon text-primary">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="card-title">Round 3: Coding /Video</h5>
+                                <p class="card-text">Your resume will be automatically screened by our ATS system.</p>
+                          </div>
+                          <a href="{{ url_for('coding') }}" class="btn btn-primary">Start 
+                                 <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+<div class="card round-card current" id="round4">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="round-icon text-primary">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="card-title">Round 4: Project Submission</h5>
+                                <p class="card-text">Your resume will be automatically screened by our ATS system.</p>
+                          </div>
+                          <a href="{{ url_for('project') }}" class="btn btn-primary">Start
+                                 <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+
                         </div>
                     </div>
                 </div>
 
-                <div class="card round-card locked" id="round2">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="round-icon text-info">
-                                <i class="fas fa-brain"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <h5 class="card-title">2. Aptitude Test</h5>
-                                <p class="card-text">Multiple-choice questions to assess your problem-solving abilities.</p>
-                                <span class="badge bg-secondary"><i class="fas fa-lock me-1"></i>Locked</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card round-card locked" id="round3">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="round-icon text-warning">
-                                <i class="fas fa-code"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <h5 class="card-title">3. Coding Test</h5>
-                                <p class="card-text">Practical coding challenges to evaluate your technical skills.</p>
-                                <span class="badge bg-secondary"><i class="fas fa-lock me-1"></i>Locked</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card round-card locked" id="round4">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="round-icon text-danger">
-                                <i class="fas fa-video"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <h5 class="card-title">4. Video Interview</h5>
-                                <p class="card-text">Recorded responses to interview questions.</p>
-                                <span class="badge bg-secondary"><i class="fas fa-lock me-1"></i>Locked</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 <div class="mt-4 text-center">
                     <button class="btn btn-secondary" onclick="showPage('dashboard')">
@@ -177,193 +179,6 @@
             </div>
         </div>
     </div>
-
-<div id="resumeScreening" class="page container mt-4">
-    <div class="row">
-        <div class="col-md-10 offset-md-1">
-            <h2 class="mb-4">Resume Screening</h2>
-            
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Upload Your Resume</h5>
-                </div>
-                <div class="card-body">
-                    <div class="upload-area border rounded p-5 text-center mb-4">
-                        <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
-                        <h5>Drag & Drop your resume here</h5>
-                        <p class="text-muted">Supported formats: PDF, DOC, DOCX (Max: 5MB)</p>
-                        <input type="file" id="resumeUpload" class="d-none" accept=".pdf,.doc,.docx">
-                        <button class="btn btn-primary mt-2" onclick="document.getElementById('resumeUpload').click()">
-                            <i class="fas fa-upload me-2"></i>Select File
-                        </button>
-                    </div>
-                    <div id="uploadStatus" class="alert alert-info d-none">
-                        <div class="d-flex align-items-center">
-                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                            <span>Uploading and analyzing your resume...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="screeningResults" class="d-none">
-                <div class="card mb-4">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Your Resume Score</h5>
-                        <div class="resume-score" id="resumeScore">0%</div>
-                        <p class="card-text" id="resumeFeedback">Your resume is being analyzed...</p>
-                    </div>
-                </div>
-                
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title">Skills Analysis</h5>
-                        <div id="skillsAnalysis">
-                            <!-- Skills will be dynamically inserted here -->
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title">Job Match Details</h5>
-                        <p><strong>Position:</strong> <span id="jobTitle">Frontend Developer</span></p>
-                        <p><strong>Required Skills:</strong> <span id="requiredSkills">JavaScript, React, HTML5, CSS3</span></p>
-                        <div class="mt-3">
-                            <h6>Keyword Matching:</h6>
-                            <div id="keywordMatch" class="d-flex flex-wrap gap-2">
-                                <!-- Keywords will be dynamically inserted here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title">Recommendations</h5>
-                        <ul class="list-group list-group-flush" id="recommendationsList">
-                            <!-- Recommendations will be dynamically inserted here -->
-                        </ul>
-                    </div>
-                </div>
-                
-                <div class="text-center">
-                    <button class="btn btn-primary me-2" onclick="completeRound(1)">
-                        Continue to Next Round <i class="fas fa-arrow-right ms-1"></i>
-                    </button>
-                    <button class="btn btn-secondary" onclick="showPage('dashboard')">
-                        <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-    <!-- Aptitude Test Page -->
-    <div id="aptitudeTest" class="page container mt-4">
-        <div class="row">
-            <div class="col-md-10 offset-md-1">
-                <h2 class="mb-4">Aptitude Test</h2>
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>You have 15 minutes to complete 10 questions.
-                </div>
-                
-                <div class="test-container">
-                    <div class="question">
-                        <h5>Question 1 of 10</h5>
-                        <p>If a train travels 300 miles in 5 hours, what is its average speed?</p>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="q1" id="q1a1">
-                            <label class="form-check-label" for="q1a1">50 mph</label>
-                        </div>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="q1" id="q1a2">
-                            <label class="form-check-label" for="q1a2">55 mph</label>
-                        </div>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="q1" id="q1a3">
-                            <label class="form-check-label" for="q1a3">60 mph</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="q1" id="q1a4">
-                            <label class="form-check-label" for="q1a4">65 mph</label>
-                        </div>
-                    </div>
-                    
-                    <div class="question">
-                        <h5>Question 2 of 10</h5>
-                        <p>Which number should come next in the pattern? 1, 4, 9, 16, 25, ?</p>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="q2" id="q2a1">
-                            <label class="form-check-label" for="q2a1">30</label>
-                        </div>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="q2" id="q2a2">
-                            <label class="form-check-label" for="q2a2">36</label>
-                        </div>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="q2" id="q2a3">
-                            <label class="form-check-label" for="q2a3">40</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="q2" id="q2a4">
-                            <label class="form-check-label" for="q2a4">45</label>
-                        </div>
-                    </div>
-                    
-                    <div class="text-center mt-4">
-                        <button class="btn btn-primary me-2" onclick="completeRound(2)">
-                            Submit Test <i class="fas fa-paper-plane ms-1"></i>
-                        </button>
-                        <button class="btn btn-secondary" onclick="showPage('dashboard')">
-                            <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Video Interview Page -->
-    <div id="videoInterview" class="page container mt-4">
-        <div class="row">
-            <div class="col-md-10 offset-md-1">
-                <h2 class="mb-4">Video Interview</h2>
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>You will have 30 seconds to prepare and 2 minutes to answer each question.
-                </div>
-                
-                <div class="interview-interface">
-                    <div class="camera-feed">
-                        <i class="fas fa-video fa-3x"></i>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <h4>Question 1: Tell us about yourself</h4>
-                        <p>Why are you interested in this position?</p>
-                    </div>
-                    
-                    <div class="countdown mb-3">02:00</div>
-                    
-                    <div class="btn-group">
-                        <button class="btn btn-success"><i class="fas fa-record-vinyl me-1"></i>Start Recording</button>
-                        <button class="btn btn-danger"><i class="fas fa-stop me-1"></i>Stop Recording</button>
-                        <button class="btn btn-primary"><i class="fas fa-play me-1"></i>Playback</button>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <button class="btn btn-primary me-2" onclick="completeRound(4)">
-                            Submit Interview <i class="fas fa-paper-plane ms-1"></i>
-                        </button>
-                        <button class="btn btn-secondary" onclick="showPage('dashboard')">
-                            <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Completion Page -->
     <div id="completion" class="page container mt-4">
         <div class="row">

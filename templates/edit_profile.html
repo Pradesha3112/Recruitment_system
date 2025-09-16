@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - {{ user.username }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .welcome {
+            color: #2c3e50;
+        }
+        .logout-btn, .back-btn {
+            background-color: #e74c3c;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+        .back-btn {
+            background-color: #3498db;
+        }
+        .back-btn:hover {
+            background-color: #2980b9;
+        }
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+        .profile-card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .card-title {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .btn-success:hover {
+            background-color: #219a52;
+        }
+        .skill-input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .skill-tag {
+            background: #3498db;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        .remove-skill {
+            margin-left: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .tab-container {
+            margin-top: 30px;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 12px 25px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        .tab.active {
+            border-bottom: 3px solid #3498db;
+            color: #3498db;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .form-section-title {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .dynamic-form-buttons {
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        .experience-item, .education-item, .certification-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        .flash-message {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .flash-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .flash-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="welcome">Edit Profile</h1>
+        <div>
+            <a href="{{ url_for('profile_page') }}" class="back-btn">← Back to Profile</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        </div>
+    </div>
+
+    <div class="profile-card">
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="" enctype="multipart/form-data">
+            <h2 class="card-title">Personal Information</h2>
+            
+            <div class="form-section">
+                <h3 class="form-section-title">Basic Details</h3>
+                <div class="form-group">
+                    <label for="full_name">Full Name</label>
+                    <input type="text" id="full_name" name="full_name" value="{{ user.full_name or '' }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="title">Professional Title</label>
+                    <input type="text" id="title" name="title" value="{{ user.title or '' }}" placeholder="e.g., Software Developer">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="{{ user.email }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone</label>
+                    <input type="tel" id="phone" name="phone" value="{{ user.phone or '' }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" name="location" value="{{ user.location or '' }}" placeholder="e.g., New York, NY">
+                </div>
+                
+                <div class="form-group">
+                    <label for="profile_picture">Profile Picture</label>
+                    <input type="file" id="profile_picture" name="profile_picture" accept="image/*">
+                    {% if user.profile_picture %}
+                        <p>Current: {{ user.profile_picture }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3 class="form-section-title">Professional Summary</h3>
+                <div class="form-group">
+                    <label for="summary">Summary</label>
+                    <textarea id="summary" name="summary" placeholder="Write a brief summary of your professional background...">{{ user.summary or '' }}</textarea>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3 class="form-section-title">Skills & Expertise</h3>
+                <div class="form-group">
+                    <label for="new_skill">Add Skills</label>
+                    <div class="skill-input-container">
+                        <input type="text" id="new_skill" placeholder="Enter a skill">
+                        <button type="button" class="btn-primary" onclick="addSkill()">Add Skill</button>
+                    </div>
+                    
+                    <div class="skills-list" id="skills-container">
+                        {% if user.skills %}
+                            {% for skill in user.skills %}
+                                <span class="skill-tag">
+                                    {{ skill }}
+                                    <span class="remove-skill" onclick="removeSkill(this)">×</span>
+                                    <input type="hidden" name="skills" value="{{ skill }}">
+                                </span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-container">
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('experience')">Work Experience</div>
+                    <div class="tab" onclick="switchTab('education')">Education</div>
+                    <div class="tab" onclick="switchTab('certifications')">Certifications</div>
+                </div>
+                
+                <div id="experience" class="tab-content active">
+                    <div id="experience-items">
+                        {% if user.experience and user.experience|length > 0 %}
+                            {% for exp in user.experience %}
+                            <div class="experience-item">
+                                <div class="form-group">
+                                    <label>Company</label>
+                                    <input type="text" name="exp_company[]" value="{{ exp.company }}" placeholder="Company name">
+                                </div>
+                                <div class="form-group">
+                                    <label>Position</label>
+                                    <input type="text" name="exp_position[]" value="{{ exp.position }}" placeholder="Your position">
+                                </div>
+                                <div class="form-group">
+                                    <label>Start Date</label>
+                                    <input type="text" name="exp_start_date[]" value="{{ exp.start_date }}" placeholder="MM/YYYY">
+                                </div>
+                                <div class="form-group">
+                                    <label>End Date</label>
+                                    <input type="text" name="exp_end_date[]" value="{{ exp.end_date or '' }}" placeholder="MM/YYYY or Present">
+                                </div>
+                                <div class="form-group">
+                                    <label>Description</label>
+                                    <textarea name="exp_description[]" placeholder="Describe your responsibilities and achievements">{{ exp.description }}</textarea>
+                                </div>
+                                <button type="button" class="btn-primary" onclick="removeExperience(this)">Remove</button>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p>No work experience added yet.</p>
+                        {% endif %}
+                    </div>
+                    <button type="button" class="btn-primary" onclick="addExperience()">Add Experience</button>
+                </div>
+                
+                <div id="education" class="tab-content">
+                    <div id="education-items">
+                        {% if user.education and user.education|length > 0 %}
+                            {% for edu in user.education %}
+                            <div class="education-item">
+                                <div class="form-group">
+                                    <label>Institution</label>
+                                    <input type="text" name="edu_institution[]" value="{{ edu.institution }}" placeholder="School or university name">
+                                </div>
+                                <div class="form-group">
+                                    <label>Degree</label>
+                                    <input type="text" name="edu_degree[]" value="{{ edu.degree }}" placeholder="Degree earned">
+                                </div>
+                                <div class="form-group">
+                                    <label>Start Date</label>
+                                    <input type="text" name="edu_start_date[]" value="{{ edu.start_date }}" placeholder="MM/YYYY">
+                                </div>
+                                <div class="form-group">
+                                    <label>End Date</label>
+                                    <input type="text" name="edu_end_date[]" value="{{ edu.end_date or '' }}" placeholder="MM/YYYY or Present">
+                                </div>
+                                <div class="form-group">
+                                    <label>Description</label>
+                                    <textarea name="edu_description[]" placeholder="Details about your education">{{ edu.description }}</textarea>
+                                </div>
+                                <button type="button" class="btn-primary" onclick="removeEducation(this)">Remove</button>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p>No education information added yet.</p>
+                        {% endif %}
+                    </div>
+                    <button type="button" class="btn-primary" onclick="addEducation()">Add Education</button>
+                </div>
+                
+                <div id="certifications" class="tab-content">
+                    <div id="certification-items">
+                        {% if user.certifications and user.certifications|length > 0 %}
+                            {% for cert in user.certifications %}
+                            <div class="certification-item">
+                                <div class="form-group">
+                                    <label>Certification Name</label>
+                                    <input type="text" name="cert_name[]" value="{{ cert.name }}" placeholder="Certification name">
+                                </div>
+                                <div class="form-group">
+                                    <label>Issuer</label>
+                                    <input type="text" name="cert_issuer[]" value="{{ cert.issuer }}" placeholder="Issuing organization">
+                                </div>
+                                <div class="form-group">
+                                    <label>Issue Date</label>
+                                    <input type="text" name="cert_issue_date[]" value="{{ cert.issue_date }}" placeholder="MM/YYYY">
+                                </div>
+                                <div class="form-group">
+                                    <label>Expiry Date</label>
+                                    <input type="text" name="cert_expiry_date[]" value="{{ cert.expiry_date or '' }}" placeholder="MM/YYYY (if applicable)">
+                                </div>
+                                <button type="button" class="btn-primary" onclick="removeCertification(this)">Remove</button>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p>No certifications added yet.</p>
+                        {% endif %}
+                    </div>
+                    <button type="button" class="btn-primary" onclick="addCertification()">Add Certification</button>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button type="submit" class="btn-success">Save Changes</button>
+                <a href="{{ url_for('profile_page') }}" class="back-btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show the selected tab content
+            document.getElementById(tabId).classList.add('active');
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Find and activate the clicked tab
+            document.querySelectorAll('.tab').forEach(tab => {
+                if (tab.textContent.toLowerCase().includes(tabId)) {
+                    tab.classList.add('active');
+                }
+            });
+        }
+        
+        function addSkill() {
+            const skillInput = document.getElementById('new_skill');
+            const skill = skillInput.value.trim();
+            
+            if (skill) {
+                const skillsContainer = document.getElementById('skills-container');
+                
+                const skillTag = document.createElement('span');
+                skillTag.className = 'skill-tag';
+                skillTag.innerHTML = `
+                    ${skill}
+                    <span class="remove-skill" onclick="removeSkill(this)">×</span>
+                    <input type="hidden" name="skills" value="${skill}">
+                `;
+                
+                skillsContainer.appendChild(skillTag);
+                skillInput.value = '';
+            }
+        }
+        
+        function removeSkill(element) {
+            element.parentElement.remove();
+        }
+        
+        function addExperience() {
+            const container = document.getElementById('experience-items');
+            
+            const experienceItem = document.createElement('div');
+            experienceItem.className = 'experience-item';
+            experienceItem.innerHTML = `
+                <div class="form-group">
+                    <label>Company</label>
+                    <input type="text" name="exp_company[]" placeholder="Company name">
+                </div>
+                <div class="form-group">
+                    <label>Position</label>
+                    <input type="text" name="exp_position[]" placeholder="Your position">
+                </div>
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="text" name="exp_start_date[]" placeholder="MM/YYYY">
+                </div>
+                <div class="form-group">
+                    <label>End Date</label>
+                    <input type="text" name="exp_end_date[]" placeholder="MM/YYYY or Present">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="exp_description[]" placeholder="Describe your responsibilities and achievements"></textarea>
+                </div>
+                <button type="button" class="btn-primary" onclick="removeExperience(this)">Remove</button>
+            `;
+            
+            container.appendChild(experienceItem);
+        }
+        
+        function removeExperience(button) {
+            button.parentElement.remove();
+        }
+        
+        function addEducation() {
+            const container = document.getElementById('education-items');
+            
+            const educationItem = document.createElement('div');
+            educationItem.className = 'education-item';
+            educationItem.innerHTML = `
+                <div class="form-group">
+                    <label>Institution</label>
+                    <input type="text" name="edu_institution[]" placeholder="School or university name">
+                </div>
+                <div class="form-group">
+                    <label>Degree</label>
+                    <input type="text" name="edu_degree[]" placeholder="Degree earned">
+                </div>
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="text" name="edu_start_date[]" placeholder="MM/YYYY">
+                </div>
+                <div class="form-group">
+                    <label>End Date</label>
+                    <input type="text" name="edu_end_date[]" placeholder="MM/YYYY or Present">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="edu_description[]" placeholder="Details about your education"></textarea>
+                </div>
+                <button type="button" class="btn-primary" onclick="removeEducation(this)">Remove</button>
+            `;
+            
+            container.appendChild(educationItem);
+        }
+        
+        function removeEducation(button) {
+            button.parentElement.remove();
+        }
+        
+        function addCertification() {
+            const container = document.getElementById('certification-items');
+            
+            const certificationItem = document.createElement('div');
+            certificationItem.className = 'certification-item';
+            certificationItem.innerHTML = `
+                <div class="form-group">
+                    <label>Certification Name</label>
+                    <input type="text" name="cert_name[]" placeholder="Certification name">
+                </div>
+                <div class="form-group">
+                    <label>Issuer</label>
+                    <input type="text" name="cert_issuer[]" placeholder="Issuing organization">
+                </div>
+                <div class="form-group">
+                    <label>Issue Date</label>
+                    <input type="text" name="cert_issue_date[]" placeholder="MM/YYYY">
+                </div>
+                <div class="form-group">
+                    <label>Expiry Date</label>
+                    <input type="text" name="cert_expiry_date[]" placeholder="MM/YYYY (if applicable)">
+                </div>
+                <button type="button" class="btn-primary" onclick="removeCertification(this)">Remove</button>
+            `;
+            
+            container.appendChild(certificationItem);
+        }
+        
+        function removeCertification(button) {
+            button.parentElement.remove();
+        }
+    </script>
+</body>
+</html>

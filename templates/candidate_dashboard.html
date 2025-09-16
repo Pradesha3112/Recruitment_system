@@ -131,12 +131,12 @@
             <div class="quick-actions">
                 <a href="{{ url_for('browse_jobs') }}" class="btn-success">🔍 Browse Jobs</a>
                 <a href="{{ url_for('view_applications') }}" class="btn-primary">📋 My Applications</a>
-                <a href="{{ url_for('profile') }}" class="btn-primary">👤 My Profile</a>
-            </div>
+                <!-- In your candidate_dashboard.html -->
+<a href="{{ url_for('profile_page') }}" class="btn-primary">👤 My Profile</a>            </div>
         </div>
 
         <div class="dashboard-card">
-            <h2 class="card-title">Application Stats</h2>
+            <h2 class="card-title">Application Status</h2>
             <div class="stats">
                 <div class="stat-item">
                     <div class="stat-number">{{ user.applications|length }}</div>

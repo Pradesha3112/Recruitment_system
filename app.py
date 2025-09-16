@@ -12,7 +12,11 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'  # Needed for session management and security
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'  # Path to our SQLite database file
 db = SQLAlchemy(app)  # Initialize the database
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
+# Create upload folder if it doesn't exist
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 # Set up Flask-Login for user session management
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -613,11 +617,6 @@ def assessment():
                          assessment=assessment,
 
                          user=current_user)
-@app.route('/application/<int:application_id>/resume_screening')
-def resume_screening(application_id):
-    # Fetch application details
-    application = Application.query.get_or_404(application_id)
-    return render_template('resume_screening.html', application=application)
 
 @app.route('/application/<int:application_id>/aptitude_test')
 def aptitude_test(application_id):
@@ -634,6 +633,132 @@ def project_round(application_id):
     application = Application.query.get_or_404(application_id)
     return render_template('project_round.html', application=application)
 
+
+@app.route('/profile-page')
+@login_required
+def profile_page():
+    # Assuming you're using Flask-Login and current_user is available
+    return render_template('profile.html', user=current_user)
+
+
+@app.route('/edit-profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    if request.method == 'POST':
+        try:
+            # Get form data
+            current_user.full_name = request.form.get('full_name', '')
+            current_user.title = request.form.get('title', '')
+            current_user.phone = request.form.get('phone', '')
+            current_user.location = request.form.get('location', '')
+            current_user.summary = request.form.get('summary', '')
+            
+            # Handle skills
+            skills = request.form.getlist('skills')
+            current_user.skills = skills
+            
+            # Handle experience
+            experience = []
+            companies = request.form.getlist('exp_company[]')
+            positions = request.form.getlist('exp_position[]')
+            start_dates = request.form.getlist('exp_start_date[]')
+            end_dates = request.form.getlist('exp_end_date[]')
+            descriptions = request.form.getlist('exp_description[]')
+            
+            for i in range(len(companies)):
+                if companies[i]:  # Only add if company name is provided
+                    experience.append({
+                        'company': companies[i],
+                        'position': positions[i],
+                        'start_date': start_dates[i],
+                        'end_date': end_dates[i],
+                        'description': descriptions[i]
+                    })
+            
+            current_user.experience = experience
+            
+            # Handle education
+            education = []
+            institutions = request.form.getlist('edu_institution[]')
+            degrees = request.form.getlist('edu_degree[]')
+            edu_start_dates = request.form.getlist('edu_start_date[]')
+            edu_end_dates = request.form.getlist('edu_end_date[]')
+            edu_descriptions = request.form.getlist('edu_description[]')
+            
+            for i in range(len(institutions)):
+                if institutions[i]:  # Only add if institution name is provided
+                    education.append({
+                        'institution': institutions[i],
+                        'degree': degrees[i],
+                        'start_date': edu_start_dates[i],
+                        'end_date': edu_end_dates[i],
+                        'description': edu_descriptions[i]
+                    })
+            
+            current_user.education = education
+            
+            # Handle certifications
+            certifications = []
+            cert_names = request.form.getlist('cert_name[]')
+            cert_issuers = request.form.getlist('cert_issuer[]')
+            cert_issue_dates = request.form.getlist('cert_issue_date[]')
+            cert_expiry_dates = request.form.getlist('cert_expiry_date[]')
+            
+            for i in range(len(cert_names)):
+                if cert_names[i]:  # Only add if certification name is provided
+                    certifications.append({
+                        'name': cert_names[i],
+                        'issuer': cert_issuers[i],
+                        'issue_date': cert_issue_dates[i],
+                        'expiry_date': cert_expiry_dates[i]
+                    })
+            
+            current_user.certifications = certifications
+            
+            # Handle profile picture upload
+            if 'profile_picture' in request.files:
+                file = request.files['profile_picture']
+                if file and file.filename:
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(file_path)
+                    current_user.profile_picture = filename
+            
+            # Save changes to database
+            db.session.commit()
+            
+            flash('Profile updated successfully!', 'success')
+            return redirect(url_for('profile_page'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash('Error updating profile: ' + str(e), 'error')
+    
+    return render_template('edit_profile.html', user=current_user)
+
+
+
+@app.route('/resume')
+@login_required
+def resume():
+    # Assuming you're using Flask-Login and current_user is available
+    return render_template('resume.html', user=current_user)
+@app.route('/apptitude')
+@login_required
+def apptitude():
+    # Assuming you're using Flask-Login and current_user is available
+    return render_template('apptitude.html', user=current_user)
+@app.route('/coding')
+@login_required
+def coding():
+    # Assuming you're using Flask-Login and current_user is available
+    return render_template('coding.html', user=current_user)
+
+@app.route('/project')
+@login_required
+def project():
+    # Assuming you're using Flask-Login and current_user is available
+    return render_template('project.html', user=current_user)
 
 # Run the application
 if __name__ == '__main__':
