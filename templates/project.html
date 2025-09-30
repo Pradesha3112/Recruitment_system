@@ -1,1 +1,607 @@
-Project Rounds
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Submission - CareerConnect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .project-container {
+            max-width: 800px;
+            margin: 30px auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .project-header {
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        .project-body {
+            padding: 30px;
+        }
+        .project-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #f9f9f9;
+        }
+        .file-upload-area {
+            border: 2px dashed #3498db;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+            background: #f8fafc;
+            transition: all 0.3s;
+        }
+        .file-upload-area:hover {
+            background: #e8f4fc;
+        }
+        .file-upload-area.dragover {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            border-color: #3498db;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+        .btn-success {
+            background-color: #27ae60;
+            border-color: #27ae60;
+        }
+        .btn-success:hover {
+            background-color: #219a52;
+            border-color: #219a52;
+        }
+        .progress {
+            height: 10px;
+            margin: 15px 0;
+        }
+        .file-list {
+            margin-top: 15px;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .file-item .file-name {
+            flex-grow: 1;
+        }
+        .file-item .file-size {
+            color: #7f8c8d;
+            margin-right: 10px;
+        }
+        .file-item .file-remove {
+            color: #e74c3c;
+            cursor: pointer;
+        }
+        .result-card {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            background: #e8f5e8;
+            border: 1px solid #c3e6cb;
+        }
+        .score-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #27ae60;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .missing-files {
+            margin-top: 15px;
+        }
+        .missing-file {
+            color: #e74c3c;
+            margin-bottom: 5px;
+        }
+        .timer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #e74c3c;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 50%;
+            font-weight: bold;
+            z-index: 1000;
+        }
+        .instructions {
+            background: #e8f4fc;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .role-badge {
+            background: #3498db;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('candidate_dashboard') }}">CareerConnect</a>
+            <span class="navbar-text ms-auto">
+                Project Submission - Round 4
+            </span>
+        </div>
+    </nav>
+
+    <div class="timer" id="timer">60:00</div>
+
+    <div class="project-container">
+        <div class="project-header">
+            <h1><i class="fas fa-project-diagram me-2"></i>Project Submission</h1>
+            <p class="mb-0">Complete your project and upload the files for evaluation</p>
+        </div>
+
+        <div class="project-body">
+            <div class="instructions">
+                <h5><i class="fas fa-info-circle me-2"></i>Instructions</h5>
+                <p class="mb-0">Based on your application role, complete the generated project and upload all required files. You have 60 minutes to complete this round.</p>
+            </div>
+
+            <!-- Role Information -->
+            <div class="mb-4">
+                <h5>Your Role:</h5>
+                <div class="role-badge">
+                    <i class="fas fa-user-tie me-2"></i>
+                    <span id="roleDisplay">{{ user_role }}</span>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 mb-4">
+                <button id="generateBtn" class="btn btn-primary">
+                    <i class="fas fa-cogs me-2"></i>Generate Project
+                </button>
+            </div>
+
+            <div id="projectDetails" class="project-card" style="display: none;">
+                <h4 id="projectTitle" class="text-primary"></h4>
+                <p id="projectDescription" class="mb-3"></p>
+                
+                <h5>Required Files:</h5>
+                <ul id="requiredFiles" class="list-group mb-3"></ul>
+                
+                <div class="progress">
+                    <div id="uploadProgress" class="progress-bar" role="progressbar" style="width: 0%;" 
+                         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                </div>
+            </div>
+
+            <div class="file-upload-area" id="dropArea">
+                <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                <h5>Drag & Drop Your Project Files Here</h5>
+                <p class="text-muted">or click to browse</p>
+                <input type="file" id="projectFolder" webkitdirectory directory multiple style="display: none;">
+                <button type="button" class="btn btn-outline-primary mt-2" id="browseBtn">
+                    <i class="fas fa-folder-open me-2"></i>Browse Files
+                </button>
+            </div>
+
+            <div class="file-list" id="fileList"></div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button id="submitBtn" class="btn btn-success btn-lg" disabled>
+                    <i class="fas fa-paper-plane me-2"></i>Submit Project
+                </button>
+                <a href="{{ url_for('candidate_dashboard') }}" class="btn btn-secondary">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </a>
+            </div>
+
+            <div id="resultCard" class="result-card" style="display: none;">
+                <h4 class="text-success text-center"><i class="fas fa-check-circle me-2"></i>Project Submitted Successfully!</h4>
+                <div class="score-display" id="scoreDisplay"></div>
+                <p class="text-center mb-3" id="scoreText"></p>
+                <div id="missingFiles" class="missing-files"></div>
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('candidate_dashboard') }}" class="btn btn-primary">
+                        Return to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Project data
+        const projects = {
+            "Developer": [
+                {
+                    title: "Portfolio Website", 
+                    description: "Create a responsive portfolio website showcasing your skills and projects.",
+                    required_files: ["index.html", "style.css", "script.js", "README.md"]
+                },
+                {
+                    title: "API Development", 
+                    description: "Develop a RESTful API for a task management system with CRUD operations.",
+                    required_files: ["app.py", "models.py", "routes.py", "requirements.txt"]
+                },
+                {
+                    title: "Database Design", 
+                    description: "Design and implement a database schema for an e-commerce platform.",
+                    required_files: ["schema.sql", "queries.sql", "documentation.md"]
+                }
+            ],
+            "UI/UX Designer": [
+                {
+                    title: "Mobile App Prototype", 
+                    description: "Design a complete mobile app prototype with user flows and interactions.",
+                    required_files: ["wireframes/", "mockups/", "user_flows.pdf", "style_guide.md"]
+                },
+                {
+                    title: "Website Redesign", 
+                    description: "Redesign an existing website with improved UX and modern aesthetics.",
+                    required_files: ["research.md", "wireframes/", "mockups/", "prototype/"]
+                },
+                {
+                    title: "Dashboard Design", 
+                    description: "Create a dashboard design for data visualization and management.",
+                    required_files: ["user_research.md", "wireframes/", "mockups/", "interactive_prototype/"]
+                }
+            ],
+            "Digital Marketing": [
+                {
+                    title: "Social Media Campaign", 
+                    description: "Design a complete social media marketing campaign for a product launch.",
+                    required_files: ["campaign_strategy.md", "content_calendar.xlsx", "visuals/", "metrics_tracking.md"]
+                },
+                {
+                    title: "SEO Analysis Project", 
+                    description: "Perform an SEO analysis for a website and provide recommendations.",
+                    required_files: ["seo_analysis.md", "keyword_research.xlsx", "competitor_analysis.md", "recommendations.md"]
+                },
+                {
+                    title: "Email Marketing Automation", 
+                    description: "Create an email marketing automation sequence for customer onboarding.",
+                    required_files: ["email_sequence.md", "templates/", "metrics.md", "target_audience.md"]
+                }
+            ],
+            "Data Analyst": [
+                {
+                    title: "Data Analysis Project", 
+                    description: "Perform data analysis on a dataset and create comprehensive visualizations.",
+                    required_files: ["analysis.py", "data_cleaning.py", "visualizations.py", "report.md"]
+                },
+                {
+                    title: "Business Intelligence Dashboard", 
+                    description: "Create a BI dashboard with key metrics and insights.",
+                    required_files: ["dashboard.py", "data_processing.py", "insights.md", "requirements.txt"]
+                },
+                {
+                    title: "Predictive Modeling", 
+                    description: "Build a predictive model using machine learning techniques.",
+                    required_files: ["model.py", "data_preprocessing.py", "evaluation.py", "results.md"]
+                }
+            ]
+        };
+
+        // Role mapping - map specific roles to general categories
+        const roleMapping = {
+            "Frontend developer": "developer",
+            "Backend Developer": "Developer",
+            "Full Stack Developer": "Developer",
+            "Python Developer": "Developer",
+            "React Developer": "Developer",
+            "UI/UX Designer": "UI/UX Designer",
+            "Digital Marketing": "Digital Marketing",
+            "Data Analyst": "Data Analyst",
+            "DevOps": "Developer",
+            "QA Tester": "Developer",
+            "Project Manager": "Digital Marketing"
+        };
+
+        let currentProject = null;
+        let uploadedFiles = [];
+        let timeLeft = 60 * 60; // 60 minutes in seconds
+
+        // Get user role from Flask template variable
+        const userRole = "{{ user_role }}";
+        const generalRole = roleMapping[userRole] || "Developer";
+
+        console.log('User role:', userRole, 'Mapped to:', generalRole);
+
+        // Timer functionality
+        const timerElement = document.getElementById('timer');
+        
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                alert('Time is up! Your project will be submitted automatically.');
+                submitProject();
+            } else {
+                timeLeft--;
+            }
+        }
+        
+        const timerInterval = setInterval(updateTimer, 1000);
+        updateTimer(); // Initial call
+
+        // DOM elements
+        const generateBtn = document.getElementById('generateBtn');
+        const projectDetails = document.getElementById('projectDetails');
+        const projectTitle = document.getElementById('projectTitle');
+        const projectDescription = document.getElementById('projectDescription');
+        const requiredFilesList = document.getElementById('requiredFiles');
+        const dropArea = document.getElementById('dropArea');
+        const browseBtn = document.getElementById('browseBtn');
+        const fileInput = document.getElementById('projectFolder');
+        const fileList = document.getElementById('fileList');
+        const submitBtn = document.getElementById('submitBtn');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const resultCard = document.getElementById('resultCard');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const scoreText = document.getElementById('scoreText');
+        const missingFiles = document.getElementById('missingFiles');
+
+        // Generate project button click
+        generateBtn.addEventListener('click', () => {
+            const roleProjects = projects[generalRole] || projects["Developer"];
+            
+            currentProject = roleProjects[Math.floor(Math.random() * roleProjects.length)];
+            
+            // Update UI with project details
+            projectTitle.textContent = currentProject.title;
+            projectDescription.textContent = currentProject.description;
+            
+            // Clear and populate required files list
+            requiredFilesList.innerHTML = '';
+            currentProject.required_files.forEach(file => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.innerHTML = `
+                    ${file}
+                    <span class="badge bg-secondary">Required</span>
+                `;
+                requiredFilesList.appendChild(li);
+            });
+            
+            // Show project details
+            projectDetails.style.display = 'block';
+            
+            // Reset file list and progress
+            fileList.innerHTML = '';
+            uploadedFiles = [];
+            uploadProgress.style.width = '0%';
+            uploadProgress.textContent = '0%';
+            submitBtn.disabled = true;
+        });
+
+        // Browse button click
+        browseBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // File input change
+        fileInput.addEventListener('change', handleFileSelection);
+
+        // Drag and drop functionality
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropArea.classList.add('dragover');
+        }
+
+        function unhighlight() {
+            dropArea.classList.remove('dragover');
+        }
+
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        function handleFileSelection(e) {
+            const files = e.target.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            if (!currentProject) {
+                alert('Please generate a project first!');
+                return;
+            }
+            
+            // Clear previous files
+            fileList.innerHTML = '';
+            uploadedFiles = [];
+            
+            // Process each file
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileName = file.name.split(/[/\\]/).pop();
+                
+                // Add to uploaded files list
+                uploadedFiles.push(fileName);
+                
+                // Create file list item
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span class="file-name">${fileName}</span>
+                    <span class="file-size">${formatFileSize(file.size)}</span>
+                    <span class="file-remove" data-file="${fileName}"><i class="fas fa-times"></i></span>
+                `;
+                fileList.appendChild(fileItem);
+            }
+            
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.file-remove').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const fileName = this.getAttribute('data-file');
+                    removeFile(fileName);
+                });
+            });
+            
+            // Update progress
+            updateProgress();
+        }
+
+        function removeFile(fileName) {
+            // Remove from uploaded files
+            uploadedFiles = uploadedFiles.filter(file => file !== fileName);
+            
+            // Update file list UI
+            fileList.innerHTML = '';
+            uploadedFiles.forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span class="file-name">${file}</span>
+                    <span class="file-remove" data-file="${file}"><i class="fas fa-times"></i></span>
+                `;
+                fileList.appendChild(fileItem);
+            });
+            
+            // Add event listeners to new remove buttons
+            document.querySelectorAll('.file-remove').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const fileName = this.getAttribute('data-file');
+                    removeFile(fileName);
+                });
+            });
+            
+            // Update progress
+            updateProgress();
+        }
+
+        function updateProgress() {
+            if (!currentProject) return;
+            
+            let score = 0;
+            currentProject.required_files.forEach(file => {
+                if (uploadedFiles.includes(file)) score++;
+            });
+            
+            const total = currentProject.required_files.length;
+            const percentage = Math.round((score / total) * 100);
+            
+            uploadProgress.style.width = `${percentage}%`;
+            uploadProgress.textContent = `${percentage}%`;
+            
+            // Enable submit button if at least one file is uploaded
+            submitBtn.disabled = uploadedFiles.length === 0;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Submit button click
+        submitBtn.addEventListener('click', submitProject);
+
+        function submitProject() {
+            if (!currentProject) {
+                alert('Please generate a project first!');
+                return;
+            }
+            
+            if (uploadedFiles.length === 0) {
+                alert('Please upload at least one file!');
+                return;
+            }
+            
+            // Calculate score
+            let score = 0;
+            currentProject.required_files.forEach(file => {
+                if (uploadedFiles.includes(file)) score++;
+            });
+            
+            const total = currentProject.required_files.length;
+            const percentage = Math.round((score / total) * 100);
+            
+            // Display results
+            scoreDisplay.textContent = `${percentage}%`;
+            scoreText.textContent = `You submitted ${score} out of ${total} required files.`;
+            
+            // Show missing files if any
+            if (score < total) {
+                const missing = currentProject.required_files.filter(file => !uploadedFiles.includes(file));
+                missingFiles.innerHTML = '<h6>Missing Files:</h6>';
+                missing.forEach(file => {
+                    const missingFile = document.createElement('div');
+                    missingFile.className = 'missing-file';
+                    missingFile.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>${file}`;
+                    missingFiles.appendChild(missingFile);
+                });
+            } else {
+                missingFiles.innerHTML = '<p class="text-success"><i class="fas fa-check-circle me-2"></i>All required files submitted!</p>';
+            }
+            
+            // Show result card
+            resultCard.style.display = 'block';
+            
+            // Scroll to results
+            resultCard.scrollIntoView({ behavior: 'smooth' });
+            
+            // Stop timer
+            clearInterval(timerInterval);
+            
+            // In a real application, you would send the results to the server here
+            console.log('Project submitted:', {
+                project: currentProject.title,
+                score: percentage,
+                files: uploadedFiles,
+                userRole: userRole
+            });
+        }
+    </script>
+</body>
+</html>

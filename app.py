@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from flask import jsonify 
 import time
 import random
 # Create and configure the Flask application
@@ -45,7 +46,31 @@ class Candidate(UserMixin, db.Model):
 
     def __repr__(self):
         return f"Candidate('{self.username}', '{self.email}')"
-
+class ProjectTemplate(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    requirements = db.Column(db.Text, nullable=False)
+    role_type = db.Column(db.String(50), nullable=False)  # 'Developer', 'UI/UX', 'Marketing', etc.
+    difficulty = db.Column(db.String(20), default='medium')
+    time_limit = db.Column(db.Integer)  # in hours
+    evaluation_criteria = db.Column(db.Text)  # JSON string for evaluation criteria
+    
+class ProjectSubmission(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    application_id = db.Column(db.Integer, db.ForeignKey('application.id'), nullable=False)
+    project_template_id = db.Column(db.Integer, db.ForeignKey('project_template.id'), nullable=False)
+    submission_text = db.Column(db.Text)
+    submission_url = db.Column(db.String(500))  # for GitHub links, etc.
+    file_path = db.Column(db.String(500))  # for uploaded files
+    submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
+    score = db.Column(db.Float)
+    feedback = db.Column(db.Text)
+    status = db.Column(db.String(20), default='submitted')  # submitted, reviewed, approved, rejected
+    
+    application = db.relationship('Application', backref='project_submissions')
+    project_template = db.relationship('ProjectTemplate', backref='submissions')
+    
 class Company(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     company_name = db.Column(db.String(100), unique=True, nullable=False)
@@ -754,12 +779,23 @@ def coding():
     # Assuming you're using Flask-Login and current_user is available
     return render_template('coding.html', user=current_user)
 
+@app.route('/api/user/current-application')
+@login_required
+def get_current_application():
+    # Get the user's most recent application
+    application = Application.query.filter_by(candidate_id=current_user.id).order_by(Application.date_applied.desc()).first()
+    if application:
+        return jsonify({
+            'role': application.job.role_type if application.job else 'Developer'
+        })
+    return jsonify({'role': 'Developer'})
 @app.route('/project')
 @login_required
 def project():
-    # Assuming you're using Flask-Login and current_user is available
-    return render_template('project.html', user=current_user)
-
+    # Simple version - get role from URL parameter or use default
+    user_role = request.args.get('role', 'Developer')
+    
+    return render_template('project.html', user=current_user, user_role=user_role)
 # Run the application
 if __name__ == '__main__':
     app.run(debug=True)
