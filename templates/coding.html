@@ -1,1 +1,189 @@
-Coding
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Coding Round Platform</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+    #container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; }
+    textarea { width: 100%; height: 200px; font-family: monospace; }
+    .problem { margin-bottom: 20px; }
+    .pass { color: green; }
+    .fail { color: red; }
+    .hidden { display: none; }
+    #log { background:#eee; padding:10px; height:150px; overflow:auto; }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h1>Recruitment Coding Round</h1>
+
+    <div id="registration">
+      <h3>Register</h3>
+      <input id="name" placeholder="Your Name"><br><br>
+      <input id="email" placeholder="Your Email"><br><br>
+      <button onclick="startRound()">Start Round</button>
+    </div>
+
+    <div id="round" class="hidden">
+      <h3 id="prob-title"></h3>
+      <p id="prob-desc"></p>
+      <pre id="prob-example"></pre>
+      <textarea id="editor"></textarea><br>
+      <button onclick="runTests()">Run Tests</button>
+      <button onclick="nextProblem()">Next</button>
+      <div id="results"></div>
+      <p>Progress: <span id="progress">0/0</span></p>
+      <p>Score: <span id="score">0/0</span></p>
+    </div>
+
+    <h3>Activity Log</h3>
+    <div id="log"></div>
+  </div>
+
+  <script>
+    // ------------------ UTILITIES ------------------
+    function log(msg) {
+      const logDiv = document.getElementById('log');
+      const time = new Date().toLocaleTimeString();
+      logDiv.innerHTML += `[${time}] ${msg}<br>`;
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function randInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function deepEqual(a, b) {
+      return JSON.stringify(a) === JSON.stringify(b);
+    }
+
+    function clone(x) {
+      return JSON.parse(JSON.stringify(x));
+    }
+
+    // ------------------ PROBLEM GENERATORS ------------------
+    function genReverseString() {
+      const s = ['hello', 'madurai', 'recruit', 'candidate', 'coding'][randInt(0, 4)];
+      return {
+        title: 'Reverse String',
+        desc: 'Given string s, return reversed string.',
+        example: `s="${s}" -> "${s.split('').reverse().join('')}"`,
+        funcName: 'reverseString',
+        tests: [
+          { input: [s], expected: s.split('').reverse().join('') },
+          { input: ['abc'], expected: 'cba' },
+          { input: [''], expected: '' }
+        ],
+        template: `// Reverse string
+function reverseString(s){
+  return '';
+}`
+      };
+    }
+
+    function genTwoSumUnique() {
+      const arr = [1, 2, 3, 2, 3];
+      return {
+        title: 'Count Unique Pairs',
+        desc: 'Given array nums and integer target, return count of unique pairs (a,b) with a+b=target.',
+        example: `nums=[1,2,3,2,3], target=5 -> 1 pair`,
+        funcName: 'countUniquePairs',
+        tests: [{ input: [arr, 5], expected: 1 }],
+        template: `// Count unique pairs
+function countUniquePairs(nums,target){
+  return 0;
+}`
+      };
+    }
+
+    const PROBLEM_BANK = [genReverseString, genTwoSumUnique];
+
+    // ------------------ STATE ------------------
+    let GENERATED = [];
+    let CUR = 0;
+    let PASSED = 0, TOTAL = 0;
+    let SUBMISSIONS = {};
+
+    // ------------------ ROUND HANDLING ------------------
+    function startRound() {
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      if (!name || !email) { alert('Fill details'); return; }
+
+      GENERATED = [];
+      for (let i = 0; i < 2; i++) {
+        const prob = PROBLEM_BANK[randInt(0, PROBLEM_BANK.length - 1)]();
+        GENERATED.push(prob);
+      }
+
+      document.getElementById('registration').classList.add('hidden');
+      document.getElementById('round').classList.remove('hidden');
+      CUR = 0; PASSED = 0; TOTAL = 0; SUBMISSIONS = {};
+      renderProblem();
+      log(`Round started for ${name} (${email})`);
+    }
+
+    function renderProblem() {
+      const p = GENERATED[CUR];
+      document.getElementById('prob-title').innerText = p.title;
+      document.getElementById('prob-desc').innerText = p.desc;
+      document.getElementById('prob-example').innerText = p.example;
+      document.getElementById('editor').value = p.template;
+      document.getElementById('results').innerHTML = '';
+      document.getElementById('progress').innerText = `${CUR + 1}/${GENERATED.length}`;
+      document.getElementById('score').innerText = `${PASSED}/${TOTAL}`;
+    }
+
+    // ------------------ TEST RUNNER ------------------
+    function runTests() {
+      const p = GENERATED[CUR];
+      const code = document.getElementById('editor').value;
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
+      try {
+        const fn = new Function(`${code}; return ${p.funcName};`)();
+        if (typeof fn !== 'function') throw new Error(`Function not found: ${p.funcName}`);
+
+        let passed = 0;
+        p.tests.forEach((t, i) => {
+          let out, err = null;
+          try { out = fn(...clone(t.input)); } catch (e) { err = e; }
+          const row = document.createElement('div');
+          if (err) {
+            row.innerText = `Test #${i + 1} ERROR: ${String(err)}`;
+            row.className = 'fail';
+          } else if (deepEqual(out, t.expected)) {
+            row.innerText = `Test #${i + 1} PASS`;
+            row.className = 'pass';
+            passed++;
+          } else {
+            row.innerText = `Test #${i + 1} FAIL: Output ${out} Expected ${t.expected}`;
+            row.className = 'fail';
+          }
+          resultsDiv.appendChild(row);
+        });
+
+        PASSED += passed;
+        TOTAL += p.tests.length;
+        SUBMISSIONS[CUR] = code;
+        document.getElementById('score').innerText = `${PASSED}/${TOTAL}`;
+        log(`Problem ${CUR + 1}: ${passed}/${p.tests.length} passed`);
+      } catch (e) {
+        resultsDiv.innerText = `Runner error: ${String(e)}`;
+        log(`Problem ${CUR + 1}: Runner error: ${String(e)}`);
+      }
+    }
+
+    function nextProblem() {
+      if (CUR < GENERATED.length - 1) {
+        CUR++;
+        renderProblem();
+      } else {
+        alert(`Round finished! Score ${PASSED}/${TOTAL}`);
+        log(`Round finished. Final Score ${PASSED}/${TOTAL}`);
+      }
+    }
+  </script>
+</body>
+</html>

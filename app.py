@@ -6,6 +6,8 @@ from flask_login import UserMixin, LoginManager, login_user, login_required, log
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from flask import jsonify 
+from flask_login import login_required, current_user
+from resume_screening import screen_resumes_from_list
 import time
 import random
 # Create and configure the Flask application
@@ -70,7 +72,7 @@ class ProjectSubmission(db.Model):
     
     application = db.relationship('Application', backref='project_submissions')
     project_template = db.relationship('ProjectTemplate', backref='submissions')
-    
+
 class Company(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     company_name = db.Column(db.String(100), unique=True, nullable=False)
@@ -762,12 +764,33 @@ def edit_profile():
     return render_template('edit_profile.html', user=current_user)
 
 
+# Default job description for demo
+JOB_DESC = """
+Looking for a Front-End Developer with experience in HTML, CSS, JavaScript, React, 
+responsive design, UI/UX, and working with APIs.
+"""
 
-@app.route('/resume')
+@app.route("/resume", methods=["GET", "POST"])
+def resume_screening():
+    if request.method == "POST":
+        uploaded_files = request.files.getlist("resumes")
+        if not uploaded_files:
+            return "❌ Please upload at least one resume"
+
+        best, all_scores = screen_resumes_from_list(JOB_DESC, uploaded_files)
+        return render_template("resume.html", best=best, all_scores=all_scores, job_desc=JOB_DESC)
+
+    return render_template("resume.html", job_desc=JOB_DESC)
+
+@app.route("/resume", methods=["GET", "POST"])
 @login_required
 def resume():
-    # Assuming you're using Flask-Login and current_user is available
-    return render_template('resume.html', user=current_user)
+    if request.method == "POST":
+        # Call screening route or whatever you want
+        return redirect(url_for('screen', job_id=1))  # example job_id
+    return render_template("resume.html")
+
+
 @app.route('/apptitude')
 @login_required
 def apptitude():

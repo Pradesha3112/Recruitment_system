@@ -1,1 +1,122 @@
-Hello
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resume Screening</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #1a73e8;
+        }
+
+        h3 {
+            color: #0b47a1;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        form {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="file"] {
+            padding: 5px;
+        }
+
+        button {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0b47a1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid #d0d7de;
+            text-align: left;
+        }
+
+        th {
+            background-color: #1a73e8;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f0f4f8;
+        }
+
+        .best-resume {
+            background-color: #e8f0fe;
+            padding: 15px;
+            border-left: 6px solid #1a73e8;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <h3>Upload Resumes</h3>
+        <form method="post" enctype="multipart/form-data">
+            <input type="file" name="resumes" multiple required>
+            <button type="submit">Start Screening</button>
+        </form>
+
+        {% if best %}
+        <div class="best-resume">
+            <h3>✅ Best Resume: {{ best.file }} (Score: {{ best.score }})</h3>
+        </div>
+
+        <table>
+            <tr>
+                <th>Resume</th>
+                <th>Score</th>
+            </tr>
+            {% for r in all_scores %}
+            <tr>
+                <td>{{ r.file }}</td>
+                <td>{{ r.score }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+    </div>
+</body>
+</html>
+
